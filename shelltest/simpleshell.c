@@ -6,9 +6,11 @@
 #include <sys/wait.h>
 
 #define MAX_ARG 20
+void get_cmd();
+void convert_cmd();
+
 char *argv[MAX_ARG];
 char *cmd = NULL;
-pid_t my_pid, child_pid;
 
 /**
 * main - super simple shell
@@ -17,7 +19,23 @@ pid_t my_pid, child_pid;
 */
 int main()
 {
-
+	pid_t my_pid, child_pid;
+	int status;
+	
+	while (1)
+	{
+		get_cmd();
+		convert_cmd();
+		child_pid = fork();
+		if (child_pid == 0)
+		{
+			execve(argv[0], argv, NULL);
+		}
+		else
+		{
+			wait(&status);
+		}
+	}
 }
 
 /**
@@ -37,4 +55,22 @@ void get_cmd()
 	/*shifting the null terminator up to remove \n*/
 	if((strsize > 0) && (cmd[strsize - 1] == '\n'))
 		cmd[strsize - 1] = '\0';
+}
+
+/**
+* convert_cmd - splits the arguments and adds them to argv array
+* 
+* Return: Void
+*/
+void convert_cmd()
+{
+	int i = 0;
+	char *s;
+	s = strtok(cmd, " ");
+	while (s != NULL)
+	{
+		argv[i] = s;
+		i++;
+		s = strtok(NULL, " ");
+	}
 }
