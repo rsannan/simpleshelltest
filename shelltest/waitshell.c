@@ -1,46 +1,102 @@
 #include <stdio.h>
+#include <string.h>
+#include <stdlib.h>
 #include <stddef.h>
 #include <unistd.h>
 #include <sys/wait.h>
+#include <sys/stat.h>
+
+
+#define MAX_ARG 20
+void get_cmd();
+void convert_cmd();
+
+char *argv[MAX_ARG];
+char *cmd = NULL;
+char *PATH[] = {"/usr/bin/", "/usr/sbin/",
+"/usr/local/bin/", "/usr/local/sbin/",
+"/bin/", "/sbin", "NULL"};
+
 /**
-* main - executes a ls-l in 5 sub processes
+* main - super simple shell
 *
-*Return: void
+* Return: 0 otherwise -1
 */
-
-int main(void)
+int main()
 {
-	char *argv[] = {"/bin/ls", "-l", "/tmp/", NULL};
-	int status, count;
 	pid_t my_pid, child_pid;
-
-	for (count = 0; count < 5; count++)
+	int status;
+	struct stat st;
+	
+	while (1)
 	{
-		child_pid = fork();
-		if (child_pid == -1)
+		get_cmd();
+		convert_cmd();
+		if (stat(argv[0], &st) != 0)
 		{
-			perror("Error");
-			return (1);
+			int ind = 0;
+			while (PATH[ind] != "NULL")
+			{
+				char fullpath[MAX_ARG];
+				/*ADD STRCAT FUNC of your own*/
+				strcat(fullpath, PATH[ind]);
+				strcat(fullpath, argv[0]);
+				if (stat(fullpath, &st) == 0)
+				{
+					argv[0] = fullpath;
+					break;
+				}
+				/*ADD MEMSET function of your own*/
+				memset(fullpath, '\0', sizeof fullpath);
+				ind++;
+			}
 		}
-		my_pid = getpid();
-		
+		child_pid = fork();
 		if (child_pid == 0)
 		{
 			execve(argv[0], argv, NULL);
-			printf("%u\n", my_pid);
-			printf("%u\n", child_pid);
 		}
 		else
 		{
 			wait(&status);
-			printf("%u\n", my_pid);
-			printf("%u\n", child_pid);
-			/*if (WIFSIGNALED(status))
-			{
-				continue;
-			}*/
 		}
-
 	}
-	return (0);
 }
+
+/**
+* get_cmd - gets user command
+*
+* Return: void
+*/
+void get_cmd()
+{
+	size_t bufsize = 0;
+	const char c = '$';
+	size_t strsize;
+	write(1, &c, 1);
+	/*store user cmd in buffer and use strsize to get length of cmd*/
+	strsize = getline(&cmd, &bufsize, stdin);
+	/*remember to free the buffer buddy*/
+	/*shifting the null terminator up to remove \n*/
+	if((strsize > 0) && (cmd[strsize - 1] == '\n'))
+		cmd[strsize - 1] = '\0';
+}
+
+/**
+* convert_cmd - splits the arguments and adds them to argv array
+* 
+* Return: Void
+*/
+void convert_cmd()
+{
+	int i = 0;
+	char *s;
+	s = strtok(cmd, " ");
+	while (s != NULL)
+	{
+		argv[i] = s;
+		i++;
+		s = strtok(NULL, " ");
+	}
+}
+
