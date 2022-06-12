@@ -12,6 +12,8 @@ void get_cmd();
 void convert_cmd();
 
 char *argv[MAX_ARG];
+int status;
+int mode = 0;
 char *cmd = NULL;
 char *PATH[] = {"/usr/bin/", "/usr/sbin/",
 "/usr/local/bin/", "/usr/local/sbin/",
@@ -24,13 +26,17 @@ char *PATH[] = {"/usr/bin/", "/usr/sbin/",
 */
 int main()
 {
-	pid_t my_pid, child_pid;
-	int status;
-	struct stat st;
+	pid_t my_pid, child_pid, p_pid;
+	struct stat st, idle_st;
 	
-	while (1)
+	while (mode != 1)
 	{
 		get_cmd();
+		if (isatty(STDIN_FILENO))
+			mode = 0;
+		else
+			mode = 1;
+
 		convert_cmd();
 		if (stat(argv[0], &st) != 0)
 		{
@@ -52,6 +58,8 @@ int main()
 			}
 		}
 		child_pid = fork();
+		my_pid = getpid();
+
 		if (child_pid == 0)
 		{
 			execve(argv[0], argv, NULL);
@@ -60,7 +68,9 @@ int main()
 		{
 			wait(&status);
 		}
+		
 	}
+	exit(98);
 }
 
 /**
@@ -99,4 +109,3 @@ void convert_cmd()
 		s = strtok(NULL, " ");
 	}
 }
-
