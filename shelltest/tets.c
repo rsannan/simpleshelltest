@@ -1,30 +1,45 @@
 #include <stdio.h>
-#include <string.h>
-#include <stdlib.h>
-#include <stddef.h>
 #include <unistd.h>
-#include <sys/wait.h>
-#include <sys/stat.h>
-
-int main(void)
+int _putchar(char c)
 {
-char *cmd = NULL;
-size_t bufsize = 0;
-
-getline(&cmd, &bufsize, stdin);
-
-if(isatty(STDIN_FILENO))
-{
-	printf("THIS is TRue\n");
-	printf("%s\n", cmd);
+	return (write(1, &c, 1));
 }
-else
+void print_number(int n)
 {
-	printf("This is false\n");
-	printf("%s\n", cmd);
+unsigned int i = n;
+
+if (n < 0)
+{
+	_putchar('-');
+	i = -n;
 }
 
+if ((i / 10) > 0)
+{
+	print_number(i / 10);
+}
 
-    /* carry on... */
-    return 0;
+_putchar((i % 10) + '0');
+
+return;
+}
+
+void _putserr(char *str)
+{
+while (*str != '\0')
+{
+	_putchar(*str);
+	str++;
+}
+return;
+}
+
+void main(void)
+{
+	char s[] = "cowb";
+	
+	_putserr(s);
+	_putserr(":");
+	print_number(__LINE__);
+	_putchar('\n');
 }

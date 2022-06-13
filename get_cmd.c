@@ -4,11 +4,16 @@
 *
 * Return: void
 */
-int get_cmd()
+void get_cmd()
 {
-	int line = 1;
-	write(1, "$", 1);
-	line = getline(&cmd, $bufsize, stdin);
+	int line_err, write_err;
+	write_err = write(1, "$", 1);
+	if (write_err == -1)
+		perror("./hsh: ");
 
-	return (line);
+	line_err = getline(&cmd, $bufsize, stdin);
+
+
+
+	return;
 }
