@@ -6,7 +6,6 @@
 #include <sys/wait.h>
 #include <sys/stat.h>
 
-
 #define MAX_ARG 20
 void get_cmd();
 void convert_cmd();
@@ -38,6 +37,10 @@ int main()
 			mode = 1;
 
 		convert_cmd();
+
+		if (argv[0] == "exit")
+			exit(98);
+
 		if (stat(argv[0], &st) != 0)
 		{
 			int ind = 0;
