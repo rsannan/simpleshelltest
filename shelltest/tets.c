@@ -2,7 +2,7 @@
 #include <unistd.h>
 int _putchar(char c)
 {
-	return (write(1, &c, 1));
+	return (write(2, &c, 1));
 }
 void print_number(int n)
 {
@@ -37,9 +37,17 @@ return;
 void main(void)
 {
 	char s[] = "cowb";
+	char a[2] = "aa";
+	int i;
+	for (i = 0; i < 4; i++)
+	{
+		printf("%c\n", a[i]);
+	}
 	
 	_putserr(s);
-	_putserr(":");
+	_putserr(": ");
 	print_number(__LINE__);
+	_putserr(": ");
+	perror(NULL);
 	_putchar('\n');
 }
